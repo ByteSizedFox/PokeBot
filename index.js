@@ -1,7 +1,6 @@
-const RetroArchClient = require("./retroarch");
+const robot = require('@jitsi/robotjs');
 
-const DSclient = new RetroArchClient({ host: '127.0.0.1', port: 55355 });
-await DSclient.connect();
+robot.setKeyboardDelay(50);
 
 const { Client, GatewayIntentBits } = require('discord.js');
 
@@ -22,12 +21,56 @@ client.on('clientReady', () => {
 client.on('messageCreate', (message) => {
   if (message.author.bot) return;
   if(message.channel.id != BOT_CHANNEL) return;
-
-  if (message.content === '!quit') {
-    DSclient.send('QUIT');
+  
+  if (message.content === '!up') {
+    robot.keyTap('up');
     return;
   }
-  
+  if (message.content === '!down') {
+    robot.keyTap('down');
+    return;
+  }
+  if (message.content === '!left') {
+    robot.keyTap('left');
+    return;
+  }
+  if (message.content === '!right') {
+    robot.keyTap('right');
+    return;
+  }
+
+  if (message.content === '!a') {
+    robot.keyTap('x');
+    return;
+  }
+  if (message.content === '!b') {
+    robot.keyTap('z');
+    return;
+  }
+  if (message.content === '!x') {
+    robot.keyTap('s');
+    return;
+  }
+  if (message.content === '!y') {
+    robot.keyTap('a');
+    return;
+  }
+  if (message.content === '!left') {
+    robot.keyTap('q');
+    return;
+  }
+  if (message.content === '!right') {
+    robot.keyTap('w');
+    return;
+  }
+  if (message.content === '!start') {
+    robot.keyTap('enter');
+    return;
+  }
+  if (message.content === '!select') {
+    robot.keyTap('shift');
+    return;
+  }
 });
 
 client.login(process.env.BOT_TOKEN);
