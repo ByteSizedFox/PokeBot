@@ -1,75 +1,63 @@
 const robot = require('@jitsi/robotjs');
-
-robot.setKeyboardDelay(50);
-
 const { Client, GatewayIntentBits } = require('discord.js');
 
-const BOT_CHANNEL = 1443670506107703489;
+const BOT_CHANNEL = '1443670506107703489';
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessageReactions
   ]
 });
 
-client.on('clientReady', () => {
+robot.setKeyboardDelay(50);
+
+const BUTTON_EMOJIS = {
+  '⬆️': 'up',
+  '⬇️': 'down',
+  '⬅️': 'left',
+  '➡️': 'right',
+  '🅰️': 'x',    // A button
+  '🅱️': 'z',    // B button
+  '❌': 's',    // X button
+  '🇾': 'a',    // Y button
+  '🇱': 'q',    // L button
+  '🇷': 'w',    // R button
+  '▶️': 'enter', // Start
+  '⏸️': 'shift' // Select
+};
+
+let controlMessage = null;
+
+client.on('clientReady', async () => {
   console.log(`Logged in as ${client.user.tag}`);
+  
+  // Send controller message
+  const channel = await client.channels.fetch(BOT_CHANNEL);
+  controlMessage = await channel.send('**RetroArch Controller**');
+  
+  // Add all button reactions
+  for (const emoji of Object.keys(BUTTON_EMOJIS)) {
+    await controlMessage.react(emoji);
+  }
 });
 
-client.on('messageCreate', (message) => {
-  if (message.author.bot) return;
-  if(message.channel.id != BOT_CHANNEL) return;
+client.on('messageReactionAdd', async (reaction, user) => {
+  if (user.bot) return;
+  if (!controlMessage || reaction.message.id !== controlMessage.id) return;
   
-  if (message.content === '!up') {
-    robot.keyTap('up');
-    return;
-  }
-  if (message.content === '!down') {
-    robot.keyTap('down');
-    return;
-  }
-  if (message.content === '!left') {
-    robot.keyTap('left');
-    return;
-  }
-  if (message.content === '!right') {
-    robot.keyTap('right');
-    return;
-  }
-
-  if (message.content === '!a') {
-    robot.keyTap('x');
-    return;
-  }
-  if (message.content === '!b') {
-    robot.keyTap('z');
-    return;
-  }
-  if (message.content === '!x') {
-    robot.keyTap('s');
-    return;
-  }
-  if (message.content === '!y') {
-    robot.keyTap('a');
-    return;
-  }
-  if (message.content === '!left') {
-    robot.keyTap('q');
-    return;
-  }
-  if (message.content === '!right') {
-    robot.keyTap('w');
-    return;
-  }
-  if (message.content === '!start') {
-    robot.keyTap('enter');
-    return;
-  }
-  if (message.content === '!select') {
-    robot.keyTap('shift');
-    return;
+  const key = BUTTON_EMOJIS[reaction.emoji.name];
+  if (key) {
+    robot.keyTap(key);
+    
+    // Remove user's reaction
+    try {
+      await reaction.users.remove(user.id);
+    } catch (error) {
+      console.error('Failed to remove reaction:', error);
+    }
   }
 });
 
