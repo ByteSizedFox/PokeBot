@@ -51,7 +51,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
   const key = BUTTON_EMOJIS[reaction.emoji.name];
   if (key) {
     robot.keyTap(key);
-    
+    console.log(key);
+
     // Remove user's reaction
     try {
       await reaction.users.remove(user.id);
